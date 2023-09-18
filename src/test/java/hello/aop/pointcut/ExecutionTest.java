@@ -29,7 +29,6 @@ public class ExecutionTest {
     }
 
 
-
     /**
      * 엄청 정확한 표현식
      * 접근제어자?: public
@@ -117,6 +116,96 @@ public class ExecutionTest {
     @Test
     void packageMatchSubPackage2() {
         pointcut.setExpression("execution(* hello.aop..*.*(..))");
+        assertThat(pointcut.matches(helloMethod, MemberServiceImpl.class)).isTrue();
+    }
+
+    @Test
+    void typeExactMatch() {
+        pointcut.setExpression("execution(* hello.aop.member.MemberServiceImpl.*(..))");
+        assertThat(pointcut.matches(helloMethod, MemberServiceImpl.class)).isTrue();
+    }
+
+    /**
+     * 부모타입이라면 자식도 가능
+     */
+    @Test
+    void typeMatchSuperType() {
+        pointcut.setExpression("execution(* hello.aop.member.MemberService.*(..))");
+        assertThat(pointcut.matches(helloMethod, MemberServiceImpl.class)).isTrue();
+    }
+
+    /**
+     * 자식타입이라면 애초에 자식메서드이므로 당연히 가능
+     */
+    @Test
+    void typeMatchInternal() throws NoSuchMethodException {
+        pointcut.setExpression("execution(* hello.aop.member.MemberServiceImpl.*(..))");
+
+        Method internalMethod = MemberServiceImpl.class.getMethod("internal", String.class);
+        assertThat(pointcut.matches(internalMethod, MemberServiceImpl.class)).isTrue();
+    }
+
+    /**
+     * 부모타입이더라도 메서드는 부모에 정의되어있는 것만 가능
+     */
+    @Test
+    void typeMatchNoSuperTypeFalse() throws NoSuchMethodException {
+        pointcut.setExpression("execution(* hello.aop.member.MemberService.*(..))");
+
+        Method internalMethod = MemberServiceImpl.class.getMethod("internal", String.class);
+        assertThat(pointcut.matches(internalMethod, MemberServiceImpl.class)).isFalse(); // false
+    }
+
+    /**
+     * String 타입의 파라미터 허용
+     * (String)
+     */
+    @Test
+    void argsMatch() {
+        pointcut.setExpression("execution(* *(String))");
+        assertThat(pointcut.matches(helloMethod, MemberServiceImpl.class)).isTrue();
+    }
+
+    /**
+     * 파라미터가 없어야 함
+     * ()
+     */
+    @Test
+    void argsMatchNoArgs() {
+        pointcut.setExpression("execution(* *())");
+        assertThat(pointcut.matches(helloMethod, MemberServiceImpl.class)).isFalse();
+    }
+
+    /**
+     * 정확하게 하나의 파라미터 허용, 모든 타입 허용
+     * (Xxx)
+     */
+    @Test
+    void argsMatchStar() {
+        pointcut.setExpression("execution(* *(*))");
+        assertThat(pointcut.matches(helloMethod, MemberServiceImpl.class)).isTrue();
+    }
+
+    /**
+     * 숫자와 무관하게 모든 파라미터, 모든 타입 허용
+     * (), (Xxx), (Xxx, Xxx)
+     */
+    @Test
+    void argsMatchAll() {
+        pointcut.setExpression("execution(* *(..))");
+        assertThat(pointcut.matches(helloMethod, MemberServiceImpl.class)).isTrue();
+    }
+
+    /**
+     * String 타입으로 시작, 숫자와 무관하게 모든 파라미터, 모든 타입 허용
+     * (String), (String, Xxx), (String, Xxx, Xxx)
+     *
+     * 만약 String이 2개 다 정확해야 되면? "execution(* *(String, String))"
+     * 만약 파라미터 갯수가 2개인데 첫번째 것은 반드시 String? "execution(* *(String, *))"
+     */
+    @Test
+    void argsMatchComplex() {
+        pointcut.setExpression("execution(* *(String, ..))");
         assertThat(pointcut.matches(helloMethod, MemberServiceImpl.class)).isTrue();
     }
 

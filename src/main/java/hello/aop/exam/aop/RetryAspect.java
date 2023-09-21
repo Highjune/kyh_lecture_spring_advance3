@@ -20,7 +20,7 @@ public class RetryAspect {
 
         for (int retryCount = 1; retryCount <= maxRetry; retryCount++) {
             try {
-                log.info("[retry] try count={}/{}", retryCount, maxRetry); // 실패하면 catch 문에서 예외 저장 후 다시 시도(joinPoint.proceed());1
+                log.info("[retry] try count={}/{}", retryCount, maxRetry); // 실패하면 catch 문에서 예외 저장 후 다시 시도(joinPoint.
                 return joinPoint.proceed(); // 성공하면 리턴하고 끝
             } catch (Exception e) {
                 exceptionHolder = e;

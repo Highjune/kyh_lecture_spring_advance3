@@ -11,10 +11,10 @@ public class CallServiceV1 {
     private CallServiceV1 callServiceV1;
 
     // 참고로 생성자로 주입받으면 안됨. 순환참조 문제. 나 자신이 생성되지도 않았는데 나 자신을 생성받는 것이므로.
-    // setter로 주입하면 됨. 생성 다 한 다음에 setter로 주입하는 단계가 다 분리되어 있음
-
+    // setter로 주입하면 됨. 생성을 다 한 후에 setter로 주입하는 단계가 다 분리되어 있음
     @Autowired
     public void setCallServiceV1(CallServiceV1 callServiceV1) {
+        log.info("callServiceV1 setter={}", callServiceV1.getClass()); // 프록시 호출임
         this.callServiceV1 = callServiceV1;
     }
 
